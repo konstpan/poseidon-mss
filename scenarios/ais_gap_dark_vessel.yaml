@@ -1,0 +1,123 @@
+# AIS Gap / Dark Vessel Scenario
+# Vessel stops transmitting AIS to test gap detection
+# All coordinates are in Thermaikos Gulf (sea area south of Thessaloniki)
+
+name: "AIS Gap / Dark Vessel Scenario"
+description: "Cargo vessel stops transmitting AIS (going dark) to test AIS gap detection"
+duration_minutes: 40
+update_interval: 30
+
+bounding_box:
+  min_lat: 40.50
+  max_lat: 40.60
+  min_lon: 22.80
+  max_lon: 22.98
+
+vessels:
+  # Vessel that will go dark
+  - mmsi: 239400001
+    name: "DARK CARGO"
+    type: "cargo"
+    start_position: [40.5300, 22.8600]
+    speed: 10.0
+    course: 90
+    behavior: "straight"
+    length: 180.0
+    width: 28.0
+    draft: 9.5
+    destination: "UNKNOWN"
+    flag_state: "XX"
+    # AIS gap configuration - stops transmitting after 10 minutes for 15 minutes
+    ais_gap:
+      start_after_seconds: 600   # 10 minutes after start
+      duration_seconds: 900      # 15 minutes dark
+
+  # Second vessel that goes dark briefly
+  - mmsi: 239400002
+    name: "INTERMITTENT SIGNAL"
+    type: "tanker"
+    start_position: [40.5450, 22.8750]
+    speed: 8.0
+    course: 180
+    behavior: "straight"
+    length: 200.0
+    width: 32.0
+    draft: 11.0
+    destination: "VOLOS"
+    flag_state: "PA"
+    # Shorter AIS gap
+    ais_gap:
+      start_after_seconds: 900   # 15 minutes after start
+      duration_seconds: 600      # 10 minutes dark
+
+  # Normal traffic for comparison
+  - mmsi: 239400003
+    name: "NORMAL SIGNAL ONE"
+    type: "cargo"
+    start_position: [40.5200, 22.8500]
+    speed: 9.0
+    course: 45
+    behavior: "straight"
+    length: 165.0
+    width: 25.0
+    draft: 8.5
+    destination: "THESSALONIKI"
+    flag_state: "GR"
+
+  - mmsi: 239400004
+    name: "NORMAL SIGNAL TWO"
+    type: "passenger"
+    start_position: [40.5550, 22.8900]
+    speed: 15.0
+    course: 270
+    behavior: "straight"
+    length: 120.0
+    width: 22.0
+    draft: 5.5
+    destination: "THESSALONIKI"
+    flag_state: "GR"
+
+  - mmsi: 239400005
+    name: "STEADY FISHING"
+    type: "fishing"
+    start_position: [40.5100, 22.8400]
+    speed: 0.5
+    course: 180
+    behavior: "loiter"
+    loiter_radius: 0.02
+    length: 18.0
+    width: 5.0
+    draft: 2.5
+    flag_state: "GR"
+
+  - mmsi: 239400006
+    name: "ANCHORED STEADY"
+    type: "cargo"
+    start_position: [40.5250, 22.8450]
+    speed: 0.0
+    course: 90
+    behavior: "anchored"
+    length: 160.0
+    width: 26.0
+    draft: 9.0
+    destination: "THESSALONIKI"
+    flag_state: "CY"
+
+expected_alerts:
+  - type: "ais_gap"
+    severity: "high"
+    expected_after_seconds: 1200  # 10 min + 10 min gap threshold
+    vessel_mmsi: 239400001
+
+  - type: "ais_gap"
+    severity: "high"
+    expected_after_seconds: 1500
+    vessel_mmsi: 239400002
+
+metadata:
+  author: "Poseidon MSS"
+  created: "2024-01-12"
+  version: "1.1"
+  tags: ["testing", "ais_gap", "dark_vessel"]
+  test_purpose: "Validate AIS transmission gap detection for potential dark vessels"
+  notes: "Coordinates updated to Thermaikos Gulf sea area"

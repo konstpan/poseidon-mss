@@ -1,0 +1,123 @@
+# Suspicious Loitering Scenario
+# Vessel loitering near port entrance for extended period
+# All coordinates are in Thermaikos Gulf (sea area south of Thessaloniki)
+
+name: "Suspicious Loitering Scenario"
+description: "Unknown vessel loitering near port entrance for extended period to test loitering detection"
+duration_minutes: 60
+update_interval: 30
+
+bounding_box:
+  min_lat: 40.50
+  max_lat: 40.60
+  min_lon: 22.80
+  max_lon: 22.98
+
+vessels:
+  # Suspicious loitering vessel near port entrance
+  - mmsi: 239300001
+    name: "UNKNOWN VESSEL"
+    type: "other"
+    start_position: [40.5750, 22.9000]  # Near port approach
+    speed: 0.3
+    course: 0
+    behavior: "loiter"
+    loiter_radius: 0.01  # Very small radius - staying in place
+    length: 45.0
+    width: 10.0
+    draft: 4.0
+    flag_state: "XX"
+
+  # Second suspicious vessel
+  - mmsi: 239300002
+    name: "UNMARKED CRAFT"
+    type: "other"
+    start_position: [40.5780, 22.9050]  # Also near port approach
+    speed: 0.2
+    course: 90
+    behavior: "loiter"
+    loiter_radius: 0.008
+    length: 25.0
+    width: 6.0
+    draft: 2.5
+    flag_state: "XX"
+
+  # Normal traffic for comparison
+  - mmsi: 239300003
+    name: "NORMAL CARGO"
+    type: "cargo"
+    start_position: [40.5200, 22.8600]
+    speed: 10.0
+    course: 45
+    behavior: "straight"
+    length: 180.0
+    width: 28.0
+    draft: 9.5
+    destination: "THESSALONIKI"
+    flag_state: "GR"
+
+  - mmsi: 239300004
+    name: "TRANSIT TANKER"
+    type: "tanker"
+    start_position: [40.5500, 22.8800]
+    speed: 8.0
+    course: 225
+    behavior: "straight"
+    length: 200.0
+    width: 32.0
+    draft: 11.0
+    destination: "PIRAEUS"
+    flag_state: "MT"
+
+  # Legitimate anchored vessel (in designated anchorage)
+  - mmsi: 239300005
+    name: "ANCHORED LEGALLY"
+    type: "cargo"
+    start_position: [40.5250, 22.8450]  # In anchorage zone
+    speed: 0.0
+    course: 90
+    behavior: "anchored"
+    length: 160.0
+    width: 26.0
+    draft: 9.0
+    destination: "THESSALONIKI"
+    flag_state: "PA"
+
+  # Ferry maintaining route
+  - mmsi: 239300006
+    name: "REGULAR FERRY"
+    type: "passenger"
+    start_position: [40.5300, 22.8700]
+    speed: 15.0
+    course: 90
+    behavior: "waypoints"
+    waypoints:
+      - [40.5320, 22.8800]
+      - [40.5340, 22.8900]
+      - [40.5320, 22.8800]
+      - [40.5300, 22.8700]
+    loop: true
+    length: 120.0
+    width: 22.0
+    draft: 5.5
+    destination: "SKIATHOS"
+    flag_state: "GR"
+
+expected_alerts:
+  - type: "loitering"
+    severity: "medium"
+    expected_after_seconds: 1800  # After 30 minutes
+    vessel_mmsi: 239300001
+
+  - type: "loitering"
+    severity: "medium"
+    expected_after_seconds: 1800
+    vessel_mmsi: 239300002
+
+metadata:
+  author: "Poseidon MSS"
+  created: "2024-01-12"
+  version: "1.1"
+  tags: ["testing", "loitering", "suspicious"]
+  test_purpose: "Validate loitering detection for vessels near sensitive areas"
+  notes: "Coordinates updated to Thermaikos Gulf sea area"

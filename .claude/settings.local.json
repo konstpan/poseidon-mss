@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(docker-compose config:*)",
+      "Bash(docker compose config:*)",
+      "Bash(docker compose exec:*)",
+      "Bash(python3 -m py_compile:*)",
+      "Bash(python3:*)",
+      "Bash(tree:*)"
+    ]
+  }
+}

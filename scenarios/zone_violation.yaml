@@ -1,0 +1,111 @@
+# Zone Violation Scenario
+# Vessel enters restricted zone to test geofencing alerts
+# All coordinates are in Thermaikos Gulf (sea area south of Thessaloniki)
+
+name: "Zone Violation Scenario"
+description: "Fishing vessel enters restricted military zone to test zone violation detection"
+duration_minutes: 20
+update_interval: 30
+
+bounding_box:
+  min_lat: 40.50
+  max_lat: 40.60
+  min_lon: 22.80
+  max_lon: 22.98
+
+# The restricted zone is approximately at:
+# Center: 40.5350, 22.8750
+# The vessel will enter from outside and penetrate the zone
+
+vessels:
+  # Suspicious fishing vessel - will violate zone
+  - mmsi: 239200001
+    name: "SUSPICIOUS FISHING"
+    type: "fishing"
+    start_position: [40.5280, 22.8680]  # Outside restricted zone
+    speed: 5.0
+    course: 45
+    behavior: "waypoints"
+    waypoints:
+      - [40.5300, 22.8700]   # Approaches zone
+      - [40.5330, 22.8730]   # Enters restricted zone (alert!)
+      - [40.5360, 22.8760]   # Deep inside zone
+      - [40.5380, 22.8780]   # Still in zone
+      - [40.5400, 22.8800]   # Exits zone
+    length: 18.0
+    width: 5.0
+    draft: 2.5
+    flag_state: "XX"
+
+  # Background normal traffic
+  - mmsi: 239200002
+    name: "NORMAL CARGO ONE"
+    type: "cargo"
+    start_position: [40.5150, 22.8600]
+    speed: 10.0
+    course: 90
+    behavior: "straight"
+    length: 180.0
+    width: 28.0
+    draft: 9.5
+    destination: "THESSALONIKI"
+    flag_state: "GR"
+
+  - mmsi: 239200003
+    name: "NORMAL TANKER"
+    type: "tanker"
+    start_position: [40.5500, 22.8900]
+    speed: 8.0
+    course: 225
+    behavior: "straight"
+    length: 200.0
+    width: 32.0
+    draft: 11.0
+    destination: "PIRAEUS"
+    flag_state: "MT"
+
+  - mmsi: 239200004
+    name: "LEGITIMATE FISHING"
+    type: "fishing"
+    start_position: [40.5100, 22.8400]  # In designated fishing area
+    speed: 0.5
+    course: 180
+    behavior: "loiter"
+    loiter_radius: 0.02
+    length: 15.0
+    width: 4.5
+    draft: 2.0
+    flag_state: "GR"
+
+  - mmsi: 239200005
+    name: "FERRY SERVICE"
+    type: "passenger"
+    start_position: [40.5250, 22.8850]
+    speed: 15.0
+    course: 270
+    behavior: "straight"
+    length: 120.0
+    width: 22.0
+    draft: 5.5
+    destination: "THESSALONIKI"
+    flag_state: "GR"
+
+expected_alerts:
+  - type: "zone_violation"
+    severity: "critical"
+    expected_after_seconds: 300
+    zone_code: "THESS-RESTRICTED-ALPHA"
+    vessel_mmsi: 239200001
+
+metadata:
+  author: "Poseidon MSS"
+  created: "2024-01-12"
+  version: "1.1"
+  tags: ["testing", "zone_violation", "geofencing"]
+  test_purpose: "Validate zone violation detection and geofencing alerts"
+  zone_info:
+    name: "THESS-RESTRICTED-ALPHA"
+    type: "restricted"
+    approximate_center: [40.5350, 22.8750]
+    approximate_radius_nm: 0.5
+  notes: "Coordinates updated to Thermaikos Gulf sea area"

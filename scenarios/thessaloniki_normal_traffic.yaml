@@ -1,0 +1,303 @@
+# Thessaloniki Normal Traffic Scenario
+# Typical port traffic for development testing
+# All coordinates are in Thermaikos Gulf (sea area south of Thessaloniki)
+
+name: "Thessaloniki Normal Traffic"
+description: "Realistic port traffic with various vessel types and behaviors for development testing"
+duration_minutes: 180
+update_interval: 30
+
+bounding_box:
+  min_lat: 40.50
+  max_lat: 40.60
+  min_lon: 22.80
+  max_lon: 22.98
+
+vessels:
+  # Cargo vessels in transit
+  - mmsi: 239000001
+    name: "AEGEAN CARGO ONE"
+    type: "cargo"
+    start_position: [40.5200, 22.8500]
+    speed: 8.0
+    course: 45
+    behavior: "straight"
+    length: 180.0
+    width: 28.0
+    draft: 9.5
+    destination: "THESSALONIKI"
+    flag_state: "GR"
+
+  - mmsi: 239000002
+    name: "MEDITERRANEAN TRADER"
+    type: "cargo"
+    start_position: [40.5500, 22.9000]
+    speed: 10.0
+    course: 225
+    behavior: "straight"
+    length: 200.0
+    width: 32.0
+    draft: 11.0
+    destination: "PIRAEUS"
+    flag_state: "MT"
+
+  - mmsi: 239000003
+    name: "OLYMPIC CARRIER"
+    type: "cargo"
+    start_position: [40.5100, 22.8800]
+    speed: 6.5
+    course: 15
+    behavior: "waypoints"
+    waypoints:
+      - [40.5200, 22.8850]
+      - [40.5350, 22.8900]
+      - [40.5450, 22.8880]
+    length: 165.0
+    width: 25.0
+    draft: 8.5
+    destination: "THESSALONIKI"
+    flag_state: "CY"
+
+  # Tankers
+  - mmsi: 239000004
+    name: "POSEIDON TANKER"
+    type: "tanker"
+    start_position: [40.5400, 22.8700]
+    speed: 5.0
+    course: 180
+    behavior: "straight"
+    length: 250.0
+    width: 44.0
+    draft: 14.5
+    destination: "THESSALONIKI OIL TERMINAL"
+    flag_state: "GR"
+
+  - mmsi: 239000005
+    name: "AEGEAN SPIRIT"
+    type: "tanker"
+    start_position: [40.5550, 22.8600]
+    speed: 7.5
+    course: 135
+    behavior: "straight"
+    length: 180.0
+    width: 32.0
+    draft: 10.0
+    destination: "KAVALA"
+    flag_state: "LR"
+
+  # Passenger ferries
+  - mmsi: 239000006
+    name: "MAKEDONIA EXPRESS"
+    type: "passenger"
+    start_position: [40.5300, 22.8600]
+    speed: 15.0
+    course: 90
+    behavior: "waypoints"
+    waypoints:
+      - [40.5320, 22.8750]
+      - [40.5340, 22.8900]
+      - [40.5360, 22.9000]
+      - [40.5340, 22.8900]
+      - [40.5320, 22.8750]
+      - [40.5300, 22.8600]
+    loop: true
+    length: 120.0
+    width: 22.0
+    draft: 5.5
+    destination: "SKIATHOS"
+    flag_state: "GR"
+
+  - mmsi: 239000007
+    name: "SPORADES STAR"
+    type: "passenger"
+    start_position: [40.5250, 22.8850]
+    speed: 18.0
+    course: 270
+    behavior: "straight"
+    length: 95.0
+    width: 18.0
+    draft: 4.0
+    destination: "THESSALONIKI"
+    flag_state: "GR"
+
+  # Fishing boats
+  - mmsi: 239000008
+    name: "KAPETAN GIORGOS"
+    type: "fishing"
+    start_position: [40.5100, 22.8400]
+    speed: 0.5
+    course: 45
+    behavior: "loiter"
+    loiter_radius: 0.02
+    length: 18.0
+    width: 5.0
+    draft: 2.5
+    flag_state: "GR"
+
+  - mmsi: 239000009
+    name: "THERMAIKOS"
+    type: "fishing"
+    start_position: [40.5050, 22.8550]
+    speed: 0.3
+    course: 180
+    behavior: "loiter"
+    loiter_radius: 0.015
+    length: 15.0
+    width: 4.5
+    draft: 2.0
+    flag_state: "GR"
+
+  - mmsi: 239000010
+    name: "NIKOS FISHING"
+    type: "fishing"
+    start_position: [40.5080, 22.8650]
+    speed: 4.0
+    course: 90
+    behavior: "straight"
+    length: 22.0
+    width: 6.0
+    draft: 3.0
+    flag_state: "GR"
+
+  # Tugs
+  - mmsi: 239000011
+    name: "THESSALONIKI TUG 1"
+    type: "tug"
+    start_position: [40.5880, 22.9100]
+    speed: 0.2
+    course: 0
+    behavior: "anchored"
+    length: 32.0
+    width: 10.0
+    draft: 4.5
+    flag_state: "GR"
+
+  - mmsi: 239000012
+    name: "PORT ASSIST"
+    type: "tug"
+    start_position: [40.5870, 22.9150]
+    speed: 6.0
+    course: 270
+    behavior: "straight"
+    length: 28.0
+    width: 9.0
+    draft: 4.0
+    flag_state: "GR"
+
+  # Pilot vessel
+  - mmsi: 239000013
+    name: "PILOT BOAT ALPHA"
+    type: "pilot_vessel"
+    start_position: [40.5150, 22.8500]
+    speed: 12.0
+    course: 45
+    behavior: "waypoints"
+    waypoints:
+      - [40.5200, 22.8600]
+      - [40.5300, 22.8750]
+      - [40.5200, 22.8600]
+      - [40.5150, 22.8500]
+    loop: true
+    length: 15.0
+    width: 5.0
+    draft: 2.0
+    flag_state: "GR"
+
+  # Pleasure craft
+  - mmsi: 239000014
+    name: "BLUE DREAM"
+    type: "pleasure_craft"
+    start_position: [40.5250, 22.8950]
+    speed: 8.0
+    course: 315
+    behavior: "straight"
+    length: 18.0
+    width: 5.0
+    draft: 2.0
+    flag_state: "GR"
+
+  - mmsi: 239000015
+    name: "SEA BREEZE"
+    type: "pleasure_craft"
+    start_position: [40.5200, 22.9050]
+    speed: 6.0
+    course: 200
+    behavior: "straight"
+    length: 14.0
+    width: 4.0
+    draft: 1.5
+    flag_state: "CY"
+
+  # More cargo vessels for density
+  - mmsi: 239000016
+    name: "BLACK SEA TRADER"
+    type: "cargo"
+    start_position: [40.5600, 22.8550]
+    speed: 11.0
+    course: 190
+    behavior: "straight"
+    length: 185.0
+    width: 30.0
+    draft: 10.0
+    destination: "ISTANBUL"
+    flag_state: "TR"
+
+  - mmsi: 239000017
+    name: "ADRIATIC EXPRESS"
+    type: "cargo"
+    start_position: [40.5150, 22.8950]
+    speed: 9.0
+    course: 340
+    behavior: "straight"
+    length: 145.0
+    width: 22.0
+    draft: 7.5
+    destination: "TRIESTE"
+    flag_state: "IT"
+
+  - mmsi: 239000018
+    name: "DANUBE CARRIER"
+    type: "cargo"
+    start_position: [40.5350, 22.9100]
+    speed: 7.0
+    course: 250
+    behavior: "straight"
+    length: 120.0
+    width: 18.0
+    draft: 6.0
+    destination: "CONSTANTA"
+    flag_state: "RO"
+
+  # Anchored vessels
+  - mmsi: 239000019
+    name: "WAITING CARGO"
+    type: "cargo"
+    start_position: [40.5250, 22.8480]
+    speed: 0.0
+    course: 90
+    behavior: "anchored"
+    length: 160.0
+    width: 26.0
+    draft: 9.0
+    destination: "THESSALONIKI"
+    flag_state: "PA"
+
+  - mmsi: 239000020
+    name: "ANCHORAGE TANKER"
+    type: "tanker"
+    start_position: [40.5280, 22.8450]
+    speed: 0.0
+    course: 120
+    behavior: "anchored"
+    length: 200.0
+    width: 35.0
+    draft: 12.0
+    destination: "THESSALONIKI"
+    flag_state: "MH"
+
+metadata:
+  author: "Poseidon MSS"
+  created: "2024-01-12"
+  version: "1.1"
+  tags: ["development", "normal", "thessaloniki"]
+  notes: "Coordinates updated to Thermaikos Gulf sea area"

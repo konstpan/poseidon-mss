@@ -1,0 +1,99 @@
+# Collision Threat Scenario
+# Two cargo vessels on collision course for testing collision detection
+# All coordinates are in Thermaikos Gulf (sea area south of Thessaloniki)
+
+name: "Collision Threat Scenario"
+description: "Two cargo vessels approaching on collision course to test TCPA/CPA detection"
+duration_minutes: 30
+update_interval: 30
+
+bounding_box:
+  min_lat: 40.50
+  max_lat: 40.60
+  min_lon: 22.80
+  max_lon: 22.98
+
+vessels:
+  # Vessel 1: Heading East
+  - mmsi: 239100001
+    name: "COLLISION ALPHA"
+    type: "cargo"
+    start_position: [40.5400, 22.8400]
+    speed: 12.0
+    course: 90  # Heading East
+    behavior: "straight"
+    length: 180.0
+    width: 28.0
+    draft: 9.5
+    destination: "THESSALONIKI"
+    flag_state: "GR"
+
+  # Vessel 2: Heading West - On collision course!
+  - mmsi: 239100002
+    name: "COLLISION BETA"
+    type: "cargo"
+    start_position: [40.5400, 22.9000]
+    speed: 10.0
+    course: 270  # Heading West - collision course!
+    behavior: "straight"
+    length: 200.0
+    width: 32.0
+    draft: 11.0
+    destination: "PIRAEUS"
+    flag_state: "MT"
+
+  # Background traffic
+  - mmsi: 239100003
+    name: "SAFE PASSAGE ONE"
+    type: "tanker"
+    start_position: [40.5200, 22.8700]
+    speed: 8.0
+    course: 45
+    behavior: "straight"
+    length: 220.0
+    width: 36.0
+    draft: 12.0
+    destination: "VOLOS"
+    flag_state: "CY"
+
+  - mmsi: 239100004
+    name: "SAFE PASSAGE TWO"
+    type: "passenger"
+    start_position: [40.5550, 22.8850]
+    speed: 15.0
+    course: 180
+    behavior: "straight"
+    length: 120.0
+    width: 22.0
+    draft: 5.5
+    destination: "SKIATHOS"
+    flag_state: "GR"
+
+  - mmsi: 239100005
+    name: "ANCHORED WITNESS"
+    type: "cargo"
+    start_position: [40.5300, 22.8500]
+    speed: 0.0
+    course: 90
+    behavior: "anchored"
+    length: 160.0
+    width: 26.0
+    draft: 9.0
+    destination: "THESSALONIKI"
+    flag_state: "PA"
+
+expected_alerts:
+  - type: "collision_risk"
+    severity: "critical"
+    expected_after_seconds: 600
+    vessel_mmsi: 239100001
+    extra:
+      target_mmsi: 239100002
+
+metadata:
+  author: "Poseidon MSS"
+  created: "2024-01-12"
+  version: "1.1"
+  tags: ["testing", "collision", "threat"]
+  test_purpose: "Validate collision risk detection (TCPA/CPA calculation)"
+  notes: "Coordinates updated to Thermaikos Gulf sea area"
