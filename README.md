@@ -2,6 +2,10 @@
 
 A comprehensive maritime security system for vessel tracking, AIS data processing, and security zone monitoring.
 
+## Dashboard
+
+![Poseidon Dashboard](dashboard.png)
+
 ## Tech Stack
 
 ### Backend
