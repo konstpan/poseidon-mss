@@ -27,11 +27,13 @@ The Poseidon MSS frontend is a React 18 single-page application (SPA) built with
 ### Key Features
 
 - Interactive Mapbox GL map with vessel markers
-- Real-time vessel position updates (polling)
+- **Real-time vessel position updates via WebSocket**
+- **Real-time collision alerts via WebSocket**
 - Security zone visualization with GeoJSON
 - Vessel details panel with comprehensive information
 - Alert notification display
 - Responsive sidebar with vessel/zone lists
+- Connection status indicator in header
 
 ---
 
@@ -74,7 +76,7 @@ The Poseidon MSS frontend is a React 18 single-page application (SPA) built with
 
 | Package | Version | Purpose |
 |---------|---------|---------|
-| socket.io-client | ^4.7.4 | WebSocket client (planned) |
+| socket.io-client | ^4.7.4 | WebSocket client for real-time updates |
 
 ---
 
@@ -147,10 +149,13 @@ graph TD
 
 #### App.tsx
 
-Root component that sets up React Router.
+Root component that sets up React Router and initializes the WebSocket connection.
 
 ```tsx
 function App() {
+  // Initialize WebSocket connection for real-time updates
+  useSocket();
+
   return (
     <Routes>
       <Route path="/" element={<Layout />}>
@@ -299,11 +304,14 @@ zoneKeys.detail(id)      // ['zones', 'detail', id]
 
 #### Caching Strategy
 
-| Data Type | Stale Time | Refetch Interval |
-|-----------|------------|------------------|
-| Vessels | 30 seconds | 60 seconds |
-| Zones | 5 minutes | 5 minutes |
-| Vessel Track | 60 seconds | - |
+| Data Type | Stale Time | Refetch | Update Method |
+|-----------|------------|---------|---------------|
+| Vessels | Infinity | Initial only | WebSocket `vessel:update` |
+| Zones | 5 minutes | 5 minutes | Polling |
+| Vessel Track | 60 seconds | On demand | API request |
+| Alerts | - | - | WebSocket `alert:new` |
+
+**Note:** Vessel data is fetched once on initial load, then updated in real-time via WebSocket. No polling is used for vessel positions.
 
 ---
 
@@ -371,6 +379,38 @@ fetchHealth(): Promise<HealthResponse>
 ```
 
 ### Custom Hooks
+
+#### useSocket
+
+Establishes and manages the WebSocket connection for real-time updates.
+
+```typescript
+function useSocket(): Socket | null
+```
+
+**Connection:**
+- Connects directly to backend at `http://localhost:8000`
+- Uses Socket.IO with WebSocket and polling transports
+- Auto-reconnects on disconnect
+
+**Events Handled:**
+| Event | Action |
+|-------|--------|
+| `connect` | Sets `isConnected` to true in store |
+| `disconnect` | Sets `isConnected` to false in store |
+| `vessel:update` | Calls `updateVessel()` in store |
+| `alert:new` | Calls `addAlert()` in store |
+
+**Usage:**
+```typescript
+// Called once in App.tsx to initialize connection
+useSocket();
+
+// Connection status available from store
+const isConnected = useVesselStore((state) => state.isConnected);
+```
+
+---
 
 #### useVessels
 

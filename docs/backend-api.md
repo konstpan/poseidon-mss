@@ -959,26 +959,119 @@ celery -A app.celery_app beat -l INFO
 
 ## WebSocket Events
 
-The backend supports Socket.IO for real-time updates.
+The backend supports Socket.IO for real-time updates via WebSocket connections. Events are broadcast through Redis pub/sub, allowing both the web server and Celery workers to emit events to connected clients.
 
 ### Connection
 
 ```javascript
+// Connect directly to backend
 const socket = io('http://localhost:8000', {
     path: '/socket.io',
-    transports: ['websocket']
+    transports: ['websocket', 'polling']
+});
+
+socket.on('connect', () => {
+    console.log('Connected to WebSocket');
+});
+
+socket.on('disconnect', () => {
+    console.log('Disconnected from WebSocket');
 });
 ```
 
-### Events (Planned)
+### Architecture
 
-| Event | Direction | Description |
-|-------|-----------|-------------|
-| `vessel:update` | Server → Client | Vessel position update |
-| `alert:new` | Server → Client | New alert created |
-| `alert:update` | Server → Client | Alert status changed |
-| `zone:vessel_enter` | Server → Client | Vessel entered zone |
-| `zone:vessel_exit` | Server → Client | Vessel exited zone |
+Socket.IO uses Redis (DB 3) as a message broker for cross-process communication:
+
+```
+┌─────────────────┐     ┌─────────────────┐
+│  Celery Worker  │     │  FastAPI Server │
+│  (AIS/Alerts)   │     │  (WebSocket)    │
+└────────┬────────┘     └────────┬────────┘
+         │                       │
+         │    ┌───────────┐      │
+         └───►│  Redis    │◄─────┘
+              │  (DB 3)   │
+              └─────┬─────┘
+                    │
+              ┌─────▼─────┐
+              │  Browser  │
+              │  Clients  │
+              └───────────┘
+```
+
+### Events
+
+| Event | Direction | Description | Payload |
+|-------|-----------|-------------|---------|
+| `vessel:update` | Server → Client | Vessel position update | `Vessel` object |
+| `alert:new` | Server → Client | New alert created | `Alert` object |
+
+### Event Payloads
+
+#### `vessel:update`
+
+Emitted when a vessel's AIS position is processed.
+
+```json
+{
+    "mmsi": "237583000",
+    "latitude": 40.6234,
+    "longitude": 22.9456,
+    "speed": 12.5,
+    "course": 45.2,
+    "heading": 44,
+    "last_seen": "2025-01-14T12:30:00Z",
+    "name": "OLYMPIC CHAMPION",
+    "ship_type": 70
+}
+```
+
+#### `alert:new`
+
+Emitted when a collision risk or other alert is created.
+
+```json
+{
+    "id": "456e7890-e89b-12d3-a456-426614174000",
+    "type": "collision_risk",
+    "severity": "critical",
+    "vessel_mmsi": "237583000",
+    "message": "Collision risk detected with vessel SEA EXPLORER",
+    "timestamp": "2025-01-14T12:30:00Z",
+    "acknowledged": false
+}
+```
+
+### Backend Implementation
+
+Socket.IO server is configured in `backend/app/socketio/server.py`:
+
+```python
+# Redis manager for cross-process communication
+_mgr = socketio.AsyncRedisManager('redis://redis:6379/3')
+
+# Socket.IO server with Redis manager
+sio = socketio.AsyncServer(
+    client_manager=_mgr,
+    async_mode="asgi",
+    cors_allowed_origins="*",
+)
+
+# Emit functions (work from web server or Celery workers)
+async def emit_vessel_update(vessel_data: dict) -> None:
+    await sio.emit("vessel:update", vessel_data)
+
+async def emit_alert(alert_data: dict) -> None:
+    await sio.emit("alert:new", alert_data)
+```
+
+### Emission Points
+
+| Location | Event | Trigger |
+|----------|-------|---------|
+| `ais/processor.py` | `vessel:update` | After processing AIS message |
+| `ais/collision_detection.py` | `alert:new` | When collision alert created |
 
 ---
 

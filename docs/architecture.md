@@ -77,7 +77,7 @@ graph TB
 | **Celery Worker** | Background tasks: AIS ingestion, risk scoring, collision detection |
 | **Celery Beat** | Task scheduling for periodic operations |
 | **PostgreSQL/PostGIS** | Persistent storage with geospatial queries |
-| **Redis** | Message broker, task queue, position caching |
+| **Redis** | Message broker, task queue, position caching, Socket.IO pub/sub (DB 3) |
 
 ---
 
@@ -307,21 +307,34 @@ sequenceDiagram
     API-->>UI: JSON response
 ```
 
-### Real-Time Update Flow
+### Real-Time Update Flow (WebSocket)
 
 ```mermaid
 sequenceDiagram
     participant Worker as Celery Worker
-    participant Cache as Redis
-    participant API as FastAPI
+    participant Redis as Redis (DB 3)
+    participant API as FastAPI + Socket.IO
     participant UI as Frontend
 
-    Worker->>Cache: Publish position update
-    API->>Cache: Subscribe to updates
-    Cache-->>API: Position update event
-    API->>UI: WebSocket emit
-    UI->>UI: Update vessel marker
+    Note over Worker,UI: Vessel Position Update
+    Worker->>Worker: Process AIS message
+    Worker->>Redis: emit_vessel_update() via Redis pub/sub
+    Redis-->>API: Socket.IO receives event
+    API->>UI: WebSocket emit "vessel:update"
+    UI->>UI: Update vessel marker in real-time
+
+    Note over Worker,UI: Collision Alert
+    Worker->>Worker: Detect collision risk
+    Worker->>Redis: emit_alert() via Redis pub/sub
+    Redis-->>API: Socket.IO receives event
+    API->>UI: WebSocket emit "alert:new"
+    UI->>UI: Display alert notification
 ```
+
+**Key Points:**
+- Socket.IO uses Redis DB 3 for cross-process pub/sub
+- Celery workers emit events that reach browser clients via Redis
+- Frontend receives updates without polling (real-time)
 
 ---
 
@@ -346,6 +359,10 @@ poseidon-mss/
 │   │   │   ├── manager.py         # Adapter manager
 │   │   │   ├── processor.py       # Message processor
 │   │   │   └── collision_detection.py
+│   │   ├── socketio/
+│   │   │   ├── __init__.py        # Module exports
+│   │   │   ├── server.py          # Socket.IO server & emit functions
+│   │   │   └── serializers.py     # Event data serializers
 │   │   ├── emulator/
 │   │   │   ├── engine.py          # Emulator core
 │   │   │   ├── vessel.py          # Vessel simulation
