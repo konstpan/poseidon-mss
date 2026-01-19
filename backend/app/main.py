@@ -11,10 +11,12 @@ import logging
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
+import socketio
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.routes import router as api_router
+from app.socketio import sio, init_socketio_server
 from app.config import get_settings
 from app.database.connection import (
     check_database_connection,
@@ -64,6 +66,14 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     except Exception as e:
         logger.error(f"Failed to initialize Redis: {e}")
         app.state.redis_client = None
+
+    # Initialize Socket.IO server
+    logger.info("Initializing Socket.IO server...")
+    try:
+        await init_socketio_server()
+        logger.info("Socket.IO server initialized")
+    except Exception as e:
+        logger.error(f"Failed to initialize Socket.IO: {e}")
 
     # Initialize AIS system
     logger.info("Initializing AIS system...")
@@ -217,3 +227,8 @@ async def system_status() -> dict:
         "ais": ais_status,
         "redis": redis_status,
     }
+
+
+# Wrap FastAPI app with Socket.IO for WebSocket support
+_fastapi_app = app
+app = socketio.ASGIApp(sio, _fastapi_app)

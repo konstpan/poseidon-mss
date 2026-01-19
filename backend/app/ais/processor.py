@@ -20,6 +20,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.ais.models import AISMessage, NavigationStatus, VesselType
 from app.cache import get_redis_client
 from app.models import Vessel, VesselPosition
+from app.socketio import emit_vessel_update
+from app.socketio.serializers import serialize_vessel_from_ais
 
 logger = logging.getLogger(__name__)
 
@@ -58,6 +60,9 @@ class AISMessageProcessor:
 
             # Cache position in Redis
             await self._cache_position(message)
+
+            # Emit real-time update via Socket.IO
+            await self._emit_vessel_update(message)
 
             return True
 
@@ -207,6 +212,29 @@ class AISMessageProcessor:
             heading=message.heading,
             timestamp=message.timestamp,
         )
+
+    async def _emit_vessel_update(self, message: AISMessage) -> None:
+        """Emit vessel update via Socket.IO.
+
+        Args:
+            message: AIS message with position data
+        """
+        try:
+            vessel_data = serialize_vessel_from_ais(
+                mmsi=message.mmsi,
+                latitude=message.latitude,
+                longitude=message.longitude,
+                speed=message.speed_over_ground,
+                course=message.course_over_ground,
+                heading=message.heading,
+                timestamp=message.timestamp,
+                name=message.vessel_name,
+                ship_type=message.vessel_type_code,
+            )
+            await emit_vessel_update(vessel_data)
+        except Exception as e:
+            # Don't fail message processing if Socket.IO emit fails
+            logger.warning(f"Failed to emit vessel update for MMSI {message.mmsi}: {e}")
 
 
 async def process_ais_message(

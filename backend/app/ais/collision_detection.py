@@ -17,6 +17,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.vessel import Vessel
 from app.models.risk_alert import RiskAlert
+from app.socketio import emit_alert
+from app.socketio.serializers import serialize_alert
 
 logger = logging.getLogger(__name__)
 
@@ -361,6 +363,14 @@ async def create_collision_alert(
     )
 
     session.add(alert)
+
+    # Emit alert via Socket.IO for real-time notification
+    try:
+        alert_data = serialize_alert(alert)
+        await emit_alert(alert_data)
+    except Exception as e:
+        logger.warning(f"Failed to emit collision alert: {e}")
+
     return alert
 
 

@@ -15,14 +15,13 @@ export const vesselKeys = {
 
 /**
  * Hook to fetch vessels with optional filtering
- * Auto-refetches every 60 seconds
+ * Initial fetch only - real-time updates via WebSocket
  */
 export function useVessels(params?: FetchVesselsParams) {
   return useQuery({
     queryKey: vesselKeys.list(params),
     queryFn: () => fetchVessels(params),
-    refetchInterval: 60 * 1000, // 60 seconds
-    staleTime: 30 * 1000, // Consider data stale after 30 seconds
+    staleTime: Infinity, // Data updated via WebSocket, not polling
   });
 }
 
@@ -34,8 +33,7 @@ export function useVesselsInBounds(bbox: BoundingBox | null, enabled = true) {
   return useQuery({
     queryKey: vesselKeys.list(bbox ? { bbox } : undefined),
     queryFn: () => fetchVessels(bbox ? { bbox, limit: 500 } : { limit: 500 }),
-    refetchInterval: 60 * 1000,
-    staleTime: 30 * 1000,
+    staleTime: Infinity, // Data updated via WebSocket, not polling
     enabled,
   });
 }
