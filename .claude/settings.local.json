@@ -6,7 +6,13 @@
       "Bash(docker compose exec:*)",
       "Bash(python3 -m py_compile:*)",
       "Bash(python3:*)",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "Bash(git -C /home/panos/poseidon-mss status)",
+      "Bash(git -C /home/panos/poseidon-mss diff --stat)",
+      "Bash(git -C /home/panos/poseidon-mss add docs/functional-requirements.md)",
+      "Bash(git -C /home/panos/poseidon-mss commit -m \"$\\(cat <<''EOF''\nRewrite functional requirements based on actual implementation\n\nUpdated the document to accurately reflect the current state of the codebase,\nincluding implemented features like WebSocket real-time updates, collision\ndetection with CPA/TCPA, risk scoring, and alert management. Added a section\ndocumenting features that are not yet implemented.\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git -C /home/panos/poseidon-mss log --oneline -3)",
+      "Bash(git -C /home/panos/poseidon-mss push)"
     ]
   }
 }
